@@ -1,72 +1,86 @@
-# Простой Django проект с GET, POST, PUT запросами
+# Django REST API — Простой проект
 
 ## 📋 Описание
 
-Это минимальный Django REST API проект, который демонстрирует работу с тремя HTTP методами:
+Минимальный Django REST API с тремя HTTP методами:
 - **GET** — получение данных
-- **POST** — создание новых данных
-- **PUT** — обновление существующих данных
+- **POST** — создание записи
+- **PUT** — обновление записи
 
-Данные хранятся в JSON-файле (без базы данных для максимальной простоты).
+Данные хранятся в JSON-файле (без базы данных).
 
 ---
 
-## 🚀 Быстрый старт
+## 🚀 Установка и запуск
 
 ### 1. Установка зависимостей
 
 ```bash
-pip install django djangorestframework
+pip install django
 ```
 
-### 2. Создание проекта
+### 2. Запуск сервера
 
 ```bash
-django-admin startproject myproject
-cd myproject
-python manage.py startapp api
+cd django-project
+python manage.py runserver
 ```
 
-### 3. Структура проекта
+Сервер запустится на `http://127.0.0.1:8000/`
+
+---
+
+## 📁 Структура проекта
 
 ```
-myproject/
-├── manage.py
+django-project/
+├── manage.py              # Утилита управления Django
+├── requirements.txt       # Зависимости проекта
 ├── myproject/
 │   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
+│   ├── settings.py        # Настройки проекта
+│   └── urls.py            # Корневые URL
 └── api/
     ├── __init__.py
-    ├── views.py
-    ├── urls.py
-    └── data.json
+    ├── views.py           # Обработчики запросов
+    ├── urls.py            # URL маршруты API
+    └── data.json          # Хранилище данных
 ```
 
 ---
 
 ## 📝 Код проекта
 
-### settings.py (добавить приложения)
+### myproject/settings.py
 
 ```python
+SECRET_KEY = 'django-insecure-simple-key-for-demo'
+DEBUG = True
+ALLOWED_HOSTS = ['*']
+
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'api',
+    'django.contrib.auth',
 ]
+
+MIDDLEWARE = []
+
+ROOT_URLCONF = 'myproject.urls'
+
+LANGUAGE_CODE = 'ru-ru'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
 ```
 
-### api/data.json (файл для хранения данных)
+### myproject/urls.py
 
-```json
-[]
+```python
+from django.urls import path, include
+
+urlpatterns = [
+    path('api/', include('api.urls')),
+]
 ```
 
 ### api/views.py
@@ -78,8 +92,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-
-# Путь к файлу с данными
 DATA_FILE = os.path.join(os.path.dirname(__file__), 'data.json')
 
 
@@ -107,7 +119,7 @@ def items_list(request):
     """
     if request.method == 'GET':
         data = read_data()
-        return JsonResponse({'items': data, 'count': len(data)}, safe=False)
+        return JsonResponse({'items': data, 'count': len(data)})
 
     elif request.method == 'POST':
         try:
@@ -115,13 +127,10 @@ def items_list(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Невалидный JSON'}, status=400)
 
-        # Валидация
         if 'name' not in body:
             return JsonResponse({'error': 'Поле "name" обязательно'}, status=400)
 
         data = read_data()
-
-        # Генерируем ID
         new_id = max([item['id'] for item in data], default=0) + 1
 
         new_item = {
@@ -132,7 +141,6 @@ def items_list(request):
 
         data.append(new_item)
         write_data(data)
-
         return JsonResponse(new_item, status=201)
 
 
@@ -160,7 +168,6 @@ def item_detail(request, item_id):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Невалидный JSON'}, status=400)
 
-        # Обновляем поля
         if 'name' in body:
             item['name'] = body['name']
         if 'description' in body:
@@ -182,27 +189,15 @@ urlpatterns = [
 ]
 ```
 
-### myproject/urls.py
+### api/data.json
 
-```python
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
-]
+```json
+[]
 ```
 
 ---
 
 ## 🧪 Тестирование API
-
-### Запустить сервер
-
-```bash
-python manage.py runserver
-```
 
 ### GET — Получить все записи
 
