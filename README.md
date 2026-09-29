@@ -22,7 +22,6 @@ pip install django
 ### 2. Запуск сервера
 
 ```bash
-cd django-project
 python manage.py runserver
 ```
 
@@ -33,9 +32,9 @@ python manage.py runserver
 ## 📁 Структура проекта
 
 ```
-django-project/
 ├── manage.py              # Утилита управления Django
 ├── requirements.txt       # Зависимости проекта
+├── README.md              # Документация
 ├── myproject/
 │   ├── __init__.py
 │   ├── settings.py        # Настройки проекта
